@@ -65,6 +65,35 @@ u8 ENCRYPT_grain_keystream(ECRYPT_ctx* ctx) {
 	ctx->LFSR[(ctx->keysize)-1]=LBit;
 	return outbit;
 }
+
+/*
+ for E-KSDC calculation
+*/
+u8 ENCRYPT_grain_E_KSDC(ECRYPT_ctx* ctx){
+	u8 i,NBit,LBit,outbit;
+	//calculate output bit
+	if(X4|X3|X2|X1|X0){
+		outbit=2;    // pending state
+	}else
+		outbit= N(79)^N(78)^N(76)^N(70)^N(49)^N(37)^N(24);
+	//calculate LFSR newly updated bit
+	LBit=L(18)^L(29)^L(42)^L(57)^L(67)^L(80);
+	//calculate NFSR newly updated bit
+	if(N(17)|N(20)|N(28)|N(35)|N(43)|N(47)|N(52)|N(59)|N(65)|N(71)){
+		NBit=2;		//pending state
+	}else		
+		NBit=L(80)^N(18)^N(66)^N(80);
+	/* Update registers */
+	for (i=1;i<(ctx->keysize);++i) {
+		ctx->NFSR[i-1]=ctx->NFSR[i];
+		ctx->LFSR[i-1]=ctx->LFSR[i];
+	}
+	ctx->NFSR[(ctx->keysize)-1]=NBit;
+	ctx->LFSR[(ctx->keysize)-1]=LBit;
+	return outbit;
+}
+
+
 /*
   backward direction
 */
@@ -86,6 +115,35 @@ u8 ENCRYPT_grain_keystream_backward(ECRYPT_ctx* ctx){
 	ctx->LFSR[0]=L0;
 	//计算上一个时刻的输出bit
 	outbit = N(79)^N(78)^N(76)^N(70)^N(49)^N(37)^N(24)^boolTable[(X4<<4) | (X3<<3) | (X2<<2) | (X1<<1) | X0];
+	return outbit;
+}
+/*
+  for BW-E-KSDC calculation
+*/
+u8 ENCRYPT_grain_BW_E_KSDC(ECRYPT_ctx* ctx){
+	u8 L0,N0,outbit,L79,N79;
+	//先保存当前的LFSR[79]和NFSR[79]
+	L79=ctx->LFSR[(ctx->keysize)-1];
+	N79=ctx->NFSR[(ctx->keysize)-1];
+	//然后再循环移位寄存器 到上一个状态
+	for (int i=(ctx->keysize)-1;i>0;--i) {
+		ctx->NFSR[i]=ctx->NFSR[i-1];
+		ctx->LFSR[i]=ctx->LFSR[i-1];
+	}
+	//利用当前LFSR[79]和NFSR[79]计算 上一个时刻的LFSR[0]和NFSR[0]
+	L0=L(18)^L(29)^L(42)^L(57)^L(67)^L79;
+	if(N(17)|N(20)|N(28)|N(35)|N(43)|N(47)|N(52)|N(59)|N(65)|N(71)){
+		N0=2;		//pending state
+	}else		
+		N0=N79^L0^N(18)^N(66);
+	//更新LFSR[0]和NFSR[0]
+	ctx->NFSR[0]=N0;
+	ctx->LFSR[0]=L0;
+		//calculate output bit
+	if(X4|X3|X2|X1|X0){
+		outbit=2;    // pending state
+	}else
+		outbit= N(79)^N(78)^N(76)^N(70)^N(49)^N(37)^N(24);
 	return outbit;
 }
 
@@ -192,6 +250,8 @@ void ECRYPT_keystream_bytes(
 		}
 	}
 }
+
+
 
 //kevin edit for backward keystream calculate
 void ECRYPT_keystream_backward_bytes(

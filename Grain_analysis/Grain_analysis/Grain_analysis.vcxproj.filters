@@ -65,5 +65,11 @@
     <ClCompile Include="Grain_KSD_Backward_characteristic_with_sampling_resistance.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Grain_E_KSDC_Martin_Simple_Compute.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Grain_BW-E_KSDC_Martin_Simple_Compute.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

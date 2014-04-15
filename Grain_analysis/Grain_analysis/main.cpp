@@ -15,6 +15,72 @@ void convertHexArray(u32 *arr,u32 Len,u8 *hexArr){
 }
 
 int main(){
+	//test the speed of E-KSDC calculation
+	//srand((unsigned)time(NULL));
+	//rc4_setup();
+	////randomly induce d differnt positions to ISD
+	//u32 d=rc4() % 30+1;  //  consider hamming weight lower than 30
+	//u32 *pos=new u32[d]();
+	//cout<<"ISD differential index:{";
+	//for(int i=0;i<d;i++){
+	//	pos[i]=rc4() % 160;
+	//	cout<<pos[i]<<",";
+	//}
+	//cout<<"}"<<endl;
+	//u8 ISD[LEN];
+	//for(int j=0;j<LEN;j++){
+	//	ISD[j]=0;
+	//}
+	//for(int j=0;j<d;j++){
+	//	u32 p=posIdx(pos[j]);
+	//	u32 r=rotateIdx(pos[j]);
+	//	ISD[p]=ISD[p]^(1<<r);
+	//}
+	//ECRYPT_ctx ctx;
+	//ctx.keysize=80;
+	//ctx.ivsize=64;
+	//ECRYPT_grain_state_load(&ctx,ISD);
+	//u8 E_KSDC_Array[KSLen*8];
+	////start testing the speed
+	//clock_t start_R, finish_R;
+	//double duration_R,speed_R;
+	//start_R=clock();
+	//for(int j=0;j<KSLen*8;j++){
+	//	ENCRYPT_grain_E_KSDC(&ctx);
+	//}
+	//finish_R=clock();
+	//duration_R=((double)finish_R-start_R)/CLOCKS_PER_SEC;
+	////2.83 GHz CPU frequence
+	//speed_R=duration_R*2.83*1000*1000*1000/((double)KSLen*8);
+	//printf("time：%4.4f sec\n"
+	//	"The encryption speed is %3.4f cycles/bit \n"
+	//	,duration_R,speed_R);
+
+	//delete [] pos;
+	//ECRYPT_ctx_reduce* ctx_reduce=new ECRYPT_ctx_reduce;
+	//u8* key_R=new u8[4]();
+	//u8* IV_R=new u8[3]();
+	//for(int i=0;i<4;i++){
+	//	key_R[i]=i;
+	//}
+	//for(int i=0;i<3;i++){
+	//	IV_R[i]=0;
+	//}
+	//ECRYPT_keysetup_reduce(ctx_reduce,key_R,32,24);
+	//ECRYPT_ivsetup_reduce(ctx_reduce,IV_R);
+	//u8* keyStream_R=new u8[KSLen_Reduced];
+	//clock_t start_R, finish_R;
+	//double duration_R,speed_R;
+	//start_R=clock();
+	//ECRYPT_keystream_bytes_reduce(ctx_reduce,keyStream_R,KSLen_Reduced);
+	//finish_R=clock();
+	//duration_R=((double)finish_R-start_R)/CLOCKS_PER_SEC;
+	////2.83 GHz CPU frequence
+	//speed_R=duration_R*2.83*1000*1000*1000/((double)KSLen_Reduced*8);
+	//printf("time：%4.4f sec\n"
+	//	"The encryption speed is %3.4f cycles/bit \n"
+	//	,duration_R,speed_R);
+	
 	/*u32 L1[80]={1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1};
 	u32 L2[80]={1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1};
 	u32 N1[80]={0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1};
@@ -57,6 +123,122 @@ int main(){
 	//	}
 	//	printf("\n");
 	//}
+
+
+	//Test the correctness of calculation E-KSDC
+	//compared with numerical results
+	srand((unsigned)time(NULL));
+	rc4_setup();
+	//test 1000 times
+	u32 counter=0;
+	for(int D=0;D<1000;D++){
+		u32 d=rc4() % 25+1;  //  consider hamming weight lower than 25
+		u32 d=4;
+		u32 N=100000;		// sampling size of numerical experiment
+		u32 *pos=new u32[d]();
+		if((++counter) % 250 ==0){
+			cout<<"proceed "<<setprecision(3)<<(double)counter*100/1000<<"%..."<<endl;
+		}
+
+		string KSDC_Gen_Alo="";
+		string KSDC_num_exp="";
+		KSDC_Gen_Alo=E_KSDC_seq_with_given_ISD(d,pos);
+		KSDC_num_exp=KSD_sequence_with_fixed_diff(d,pos,N);
+		if(KSDC_Gen_Alo.compare(KSDC_num_exp)!=0){ //record the exceptional cases, i.e., inconsistent cases
+			//randomly induce differences
+			cout<<"ISD differential index:{";
+			for(int i=0;i<d;i++){
+				pos[i]=rc4() % 160;
+				cout<<pos[i]<<",";
+			}
+			cout<<"}"<<endl;
+			cout<<"KSDC (GA):"<<KSDC_Gen_Alo<<endl;
+			cout<<"KSDC (NE):"<<KSDC_num_exp<<endl;
+			vector<int> act_pos;
+			vector<int> non_act_pos;
+			vector<int> pending_pos;
+
+			vector<int> act_pos_NE;
+			vector<int> non_act_pos_NE;
+			vector<int> pending_pos_NE;
+			u32 KSDC_gen_alo_fixed_num=0;
+			u32 KSDC_num_exp_fixed_num=0;
+			for(int j=0;j<KSLen*8;j++){
+				if(KSDC_Gen_Alo.at(j)=='0'){
+					KSDC_gen_alo_fixed_num++;
+					non_act_pos.push_back(j+1);
+				}else if(KSDC_Gen_Alo.at(j)=='1'){
+					KSDC_gen_alo_fixed_num++;
+					act_pos.push_back(j+1);
+				}else
+					pending_pos.push_back(j+1);
+
+
+				if(KSDC_num_exp.at(j)=='0'){
+					KSDC_num_exp_fixed_num++;
+					non_act_pos_NE.push_back(j+1);
+				}else if(KSDC_num_exp.at(j)=='1'){
+					KSDC_num_exp_fixed_num++;
+					act_pos_NE.push_back(j+1);
+				}else
+					pending_pos_NE.push_back(j+1);
+
+
+			}
+			cout<<"Number of fixed positions (GA)："<<KSDC_gen_alo_fixed_num;
+			cout<<"\nNumber of fixed positions (NE)："<<KSDC_num_exp_fixed_num;
+			cout<<"\nAbsolute active positions(Y) (GA):{";
+			vector<int>::iterator beg=act_pos.begin();
+			vector<int>::iterator end=act_pos.end();
+			for(;beg!=end;beg++){
+				cout<<*beg<<",";
+			}
+			cout<<"}\nAbsolute active positions(Y) (NE):{";
+			beg=act_pos_NE.begin();
+			end=act_pos_NE.end();
+			for(;beg!=end;beg++){
+				cout<<*beg<<",";
+			}
+	
+			cout<<"}\nNon-active positions(N) (GA)：{";
+			beg=non_act_pos.begin();
+			end=non_act_pos.end();
+			for(;beg!=end;beg++){
+				cout<<*beg<<",";
+			}
+			cout<<"}\nNon-active positions(N) (NE)：{";
+			beg=non_act_pos_NE.begin();
+			end=non_act_pos_NE.end();
+			for(;beg!=end;beg++){
+				cout<<*beg<<",";
+			}
+
+
+			cout<<"}\nPending positions(P) (GA)：{";
+			beg=pending_pos.begin();
+			end=pending_pos.end();
+			for(;beg!=end;beg++){
+				cout<<*beg<<",";
+			}
+			cout<<"}\nPending positions(P) (NE)：{";
+			beg=pending_pos_NE.begin();
+			end=pending_pos_NE.end();
+			for(;beg!=end;beg++){
+				cout<<*beg<<",";
+			}
+			cout<<"}"<<endl<<endl<<endl;
+		}
+		delete [] pos;
+		/*cout<<"------General Algorithm-----"<<endl;
+		E_KSDC_seq_with_given_ISD(d,pos);
+		cout<<"------Numberical Experiments----Number of sampling internal states:"<<N<<"----"<<endl;
+		KSD_pos_with_fixed_diff(d,pos,1,N);
+		cout<<endl<<endl;*/
+	}
+	cout<<"test complete..."<<endl;
+
+
+
 	//测试maple给出的backward方向的KSD的差分分布  随机元的建立
 	/*srand((unsigned)time(NULL));
 	rc4_setup();
@@ -263,18 +445,18 @@ int main(){
 	
 	//验证d-near-collision状态的存在性  不重复利用状态
 	//随机源的建立
-	srand((unsigned)time(NULL));
-	rc4_setup();
-	u32 N_total=100;
-	u32 step=10;
-	u32 total=0;
-	for(int i=0;i<N_total;i++){//重复100次
-		cout<<"************i:"<<i<<"*************"<<endl;
-		u32 res=validate_d_near_collision_Lemma_1(43,15,step);
-		if(res)
-			total++;
-	}
-	cout<<"成功率为："<<setprecision(3)<<(double)total/N_total<<endl;
+	//srand((unsigned)time(NULL));
+	//rc4_setup();
+	//u32 N_total=100;
+	//u32 step=10;
+	//u32 total=0;
+	//for(int i=0;i<N_total;i++){//重复100次
+	//	cout<<"************i:"<<i<<"*************"<<endl;
+	//	u32 res=validate_d_near_collision_Lemma_1(43,15,step);
+	//	if(res)
+	//		total++;
+	//}
+	//cout<<"成功率为："<<setprecision(3)<<(double)total/N_total<<endl;
 	//u32 num_col=0;
 	//u32 N_total=100;
 	// u32 step=1;
@@ -494,9 +676,11 @@ int main(){
 
 	//srand((unsigned)time(NULL));
 	//rc4_setup();	
-	//for(int d=1;d<=25;d++){
+	//for(int d=3;d<=30;d++){
 	//	cout<<"*************************d:"<<d<<"************************"<<endl;
-	//	ave_KSD_pos_with_fixed_diff_with_SP(d,300,100000);
+	//	//ave_KSD_pos_with_fixed_diff_with_SP(d,300,100000);
+	//	
+	//	average_fixed_pos_E_KSDC(d,1000000);
 	//	//ave_KSD_pos_with_fixed_diff(d,500,100000);
 	//	//BW_ave_KSD_pos_with_fixed_diff(d,300,100000);
 	//	//BW_ave_KSD_pos_with_fixed_diff_with_SP(d,300,100000);

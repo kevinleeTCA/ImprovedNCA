@@ -64,6 +64,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Convertor.cpp" />
+    <ClCompile Include="Grain_BW-E_KSDC_Martin_Simple_Compute.cpp" />
+    <ClCompile Include="Grain_E_KSDC_Martin_Simple_Compute.cpp" />
     <ClCompile Include="Grain_ISD_Proportion_Test.cpp" />
     <ClCompile Include="Grain_KSD_Backward_characteristic.cpp" />
     <ClCompile Include="Grain_KSD_Backward_characteristic_with_sampling_resistance.cpp" />

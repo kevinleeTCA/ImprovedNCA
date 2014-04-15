@@ -155,123 +155,248 @@ void ave_KSD_pos_with_fixed_diff(u32 d,u32 num_ISD,u32 N){
 /*参数：
 d:输入差分的最大汉明重量,也就是数组pos的长度
 pos:引入差分位置的下标数组
-num_ISD:随机选择汉明重量为d的输入差分的个数
 N:每一个差分对应的测试样本的数量
 */
-void KSD_pos_with_fixed_diff(u32 d,u32 *pos,u32 num_ISD,u32 N){
-	for(int D=1;D<=num_ISD;D++){
-		//初始化 输入差分为全0
-		u8 ISD[LEN];
-		for(int j=0;j<LEN;j++){
-			ISD[j]=0;
-		}
-		//引入差分
-		for(int j=0;j<d;j++){
-			u32 p=posIdx(pos[j]);
-			u32 r=rotateIdx(pos[j]);
-			ISD[p]=ISD[p]^(1<<r);
-		}
-		//输出当前ISD
-		/*	cout<<"\n-------------State Differential-"<<D<<":"<<ends;
-		for(int j=0;j<LEN;j++){
-				printf("%x ",ISD[j]);
-		}
-		cout<<"-----------"<<endl;*/
-		//计算KSD characteristic
-		u8 And_logic[KSLen];   //用来确定差分中全1的位置
-		u8 Or_logic[KSLen];		//用来确定差分中全0的位置
-		//初始化 and 和 or logic
-		for(int i=0;i<KSLen;i++){
-			And_logic[i]=255;
-			Or_logic[i]=0;
-		}
-		for(int i=0;i<N;i++){
-			//随机选择一个输入状态
-			u8 rnd_state_1[LEN];
-			for(int j=0;j<LEN;j++){
-				rnd_state_1[j]=rc4();
-			}
-			//根据差分位置，得到另一个状态rud_state_2
-			u8 rnd_state_2[LEN];
-			for(int j=0;j<LEN;j++){
-				rnd_state_2[j]=rnd_state_1[j]^ISD[j];
-			}
-
-			//分别代入Grain中
-			ECRYPT_ctx ctx_1;
-			ctx_1.keysize=80;
-			ctx_1.ivsize=64;
-			u8 keyStream_1[KSLen];
-			ECRYPT_ctx ctx_2;
-			ctx_2.keysize=80;
-			ctx_2.ivsize=64;
-			u8 keyStream_2[KSLen];
-			//将状态代入grain中,获得对应的长度为KSLen的密钥流，并输出其差分
-			ECRYPT_grain_state_load(&ctx_1,rnd_state_1);
-			ECRYPT_grain_state_load(&ctx_2,rnd_state_2);
-			ECRYPT_keystream_bytes(&ctx_1,keyStream_1,KSLen);
-			ECRYPT_keystream_bytes(&ctx_2,keyStream_2,KSLen);
-			//计算输出差分
-			u8 Diff_KS[KSLen];
-			for(int j=0;j<KSLen;j++){
-				Diff_KS[j]=keyStream_1[j]^keyStream_2[j];
-			}
-			//计算KSD characteristic
-			for(int j=0;j<KSLen;j++){
-				And_logic[j]&=Diff_KS[j];
-				Or_logic[j]|=Diff_KS[j];
-			}
-		}
-		//计算当前输入差分对应的KSD的characteristic  
-		//And逻辑确定全1的位置  Or逻辑确定全0的位置  剩下的就是不确定的位置
-		//分别记录Active  non-active和possible active位置的下标
-		vector<int> act_pos;
-		vector<int> non_act_pos;
-		vector<int> poss_act_pos;
-		string KSD_character="";
-		int KW_KSD_CH=0;
-		for(int i=0;i<KSLen;i++){
-			u8 t_and=And_logic[i];
-			u8 t_or=Or_logic[i];
-			for(int j=0;j<8;j++){
-				if((t_and>>j)&0x01){
-					KW_KSD_CH++;
-					KSD_character.append("1");
-					act_pos.push_back(i*8+j+1);
-				}
-				else if(!( (t_or>>j)&0x01 )){
-					KW_KSD_CH++;
-					KSD_character.append("0");
-					non_act_pos.push_back(i*8+j+1);
-				}
-				else{
-					KSD_character.append("*");
-					poss_act_pos.push_back(i*8+j+1);
-				}
-			}
-		}
-		/*if(KW_KSD_CH>15){
-			cout<<"输出差分的KSD characteristic为:"<<KSD_character<<endl;
-			cout<<" 固定位置的个数："<<KW_KSD_CH<<endl<<endl;
-		}*/
-		cout<<"Backward KSD characteristic:"<<KSD_character;
-		cout<<"\n固定位置的个数："<<KW_KSD_CH;
-		cout<<"\n活跃位置为：{";
-		vector<int>::iterator beg=act_pos.begin();
-		vector<int>::iterator end=act_pos.end();
-		for(;beg!=end;beg++){
-			cout<<*beg<<",";
-		}
-		cout<<"}\n非活跃位置为：{";
-		beg=non_act_pos.begin();
-		end=non_act_pos.end();
-		for(;beg!=end;beg++){
-			cout<<*beg<<",";
-		}
-		cout<<"}\n";
-		//delete [] pos;
+void KSD_pos_with_fixed_diff(u32 d,u32 *pos,u32 N){
+	//初始化 输入差分为全0
+	u8 ISD[LEN];
+	for(int j=0;j<LEN;j++){
+		ISD[j]=0;
 	}
+	//引入差分
+	for(int j=0;j<d;j++){
+		u32 p=posIdx(pos[j]);
+		u32 r=rotateIdx(pos[j]);
+		ISD[p]=ISD[p]^(1<<r);
+	}
+	//输出当前ISD
+	/*	cout<<"\n-------------State Differential-"<<D<<":"<<ends;
+	for(int j=0;j<LEN;j++){
+			printf("%x ",ISD[j]);
+	}
+	cout<<"-----------"<<endl;*/
+	//计算KSD characteristic
+	u8 And_logic[KSLen];   //用来确定差分中全1的位置
+	u8 Or_logic[KSLen];		//用来确定差分中全0的位置
+	//初始化 and 和 or logic
+	for(int i=0;i<KSLen;i++){
+		And_logic[i]=255;
+		Or_logic[i]=0;
+	}
+	for(int i=0;i<N;i++){
+		//随机选择一个输入状态
+		u8 rnd_state_1[LEN];
+		for(int j=0;j<LEN;j++){
+			rnd_state_1[j]=rc4();
+		}
+		//根据差分位置，得到另一个状态rud_state_2
+		u8 rnd_state_2[LEN];
+		for(int j=0;j<LEN;j++){
+			rnd_state_2[j]=rnd_state_1[j]^ISD[j];
+		}
+
+		//分别代入Grain中
+		ECRYPT_ctx ctx_1;
+		ctx_1.keysize=80;
+		ctx_1.ivsize=64;
+		u8 keyStream_1[KSLen];
+		ECRYPT_ctx ctx_2;
+		ctx_2.keysize=80;
+		ctx_2.ivsize=64;
+		u8 keyStream_2[KSLen];
+		//将状态代入grain中,获得对应的长度为KSLen的密钥流，并输出其差分
+		ECRYPT_grain_state_load(&ctx_1,rnd_state_1);
+		ECRYPT_grain_state_load(&ctx_2,rnd_state_2);
+		ECRYPT_keystream_bytes(&ctx_1,keyStream_1,KSLen);
+		ECRYPT_keystream_bytes(&ctx_2,keyStream_2,KSLen);
+		//计算输出差分
+		u8 Diff_KS[KSLen];
+		for(int j=0;j<KSLen;j++){
+			Diff_KS[j]=keyStream_1[j]^keyStream_2[j];
+		}
+		//计算KSD characteristic
+		for(int j=0;j<KSLen;j++){
+			And_logic[j]&=Diff_KS[j];
+			Or_logic[j]|=Diff_KS[j];
+		}
+	}
+	//计算当前输入差分对应的KSD的characteristic  
+	//And逻辑确定全1的位置  Or逻辑确定全0的位置  剩下的就是不确定的位置
+	//分别记录Active  non-active和possible active位置的下标
+	vector<int> act_pos;
+	vector<int> non_act_pos;
+	vector<int> poss_act_pos;
+	string KSD_character="";
+	int KW_KSD_CH=0;
+	for(int i=0;i<KSLen;i++){
+		u8 t_and=And_logic[i];
+		u8 t_or=Or_logic[i];
+		for(int j=0;j<8;j++){
+			if((t_and>>j)&0x01){
+				KW_KSD_CH++;
+				KSD_character.append("1");
+				act_pos.push_back(i*8+j+1);
+			}
+			else if(!( (t_or>>j)&0x01 )){
+				KW_KSD_CH++;
+				KSD_character.append("0");
+				non_act_pos.push_back(i*8+j+1);
+			}
+			else{
+				KSD_character.append("*");
+				poss_act_pos.push_back(i*8+j+1);
+			}
+		}
+	}
+	cout<<"E-KSDC:"<<KSD_character;
+	cout<<"\nNumber of fixed positions："<<KW_KSD_CH;
+	cout<<"\nAbsolute active positions(Y)：{";
+	vector<int>::iterator beg=act_pos.begin();
+	vector<int>::iterator end=act_pos.end();
+	for(;beg!=end;beg++){
+		cout<<*beg<<",";
+	}
+	cout<<"}\nNon-active positions(N)：{";
+	beg=non_act_pos.begin();
+	end=non_act_pos.end();
+	for(;beg!=end;beg++){
+		cout<<*beg<<",";
+	}
+	cout<<"}\nPending positions(P)：{";
+	beg=poss_act_pos.begin();
+	end=poss_act_pos.end();
+	for(;beg!=end;beg++){
+		cout<<*beg<<",";
+	}
+	cout<<"}"<<endl;
 }
+
+
+//计算给定一个差分对应的输出KSD的characteristic （数值实验）
+/*参数：
+d:输入差分的最大汉明重量,也就是数组pos的长度
+pos:引入差分位置的下标数组
+N:每一个差分对应的测试样本的数量
+
+返回对应的KSD characteristic
+*/
+string KSD_sequence_with_fixed_diff(u32 d,u32 *pos,u32 N){
+	//初始化 输入差分为全0
+	u8 ISD[LEN];
+	for(int j=0;j<LEN;j++){
+		ISD[j]=0;
+	}
+	//引入差分
+	for(int j=0;j<d;j++){
+		u32 p=posIdx(pos[j]);
+		u32 r=rotateIdx(pos[j]);
+		ISD[p]=ISD[p]^(1<<r);
+	}
+	//输出当前ISD
+	/*	cout<<"\n-------------State Differential-"<<D<<":"<<ends;
+	for(int j=0;j<LEN;j++){
+			printf("%x ",ISD[j]);
+	}
+	cout<<"-----------"<<endl;*/
+	//计算KSD characteristic
+	u8 And_logic[KSLen];   //用来确定差分中全1的位置
+	u8 Or_logic[KSLen];		//用来确定差分中全0的位置
+	//初始化 and 和 or logic
+	for(int i=0;i<KSLen;i++){
+		And_logic[i]=255;
+		Or_logic[i]=0;
+	}
+	for(int i=0;i<N;i++){
+		//随机选择一个输入状态
+		u8 rnd_state_1[LEN];
+		for(int j=0;j<LEN;j++){
+			rnd_state_1[j]=rc4();
+		}
+		//根据差分位置，得到另一个状态rud_state_2
+		u8 rnd_state_2[LEN];
+		for(int j=0;j<LEN;j++){
+			rnd_state_2[j]=rnd_state_1[j]^ISD[j];
+		}
+
+		//分别代入Grain中
+		ECRYPT_ctx ctx_1;
+		ctx_1.keysize=80;
+		ctx_1.ivsize=64;
+		u8 keyStream_1[KSLen];
+		ECRYPT_ctx ctx_2;
+		ctx_2.keysize=80;
+		ctx_2.ivsize=64;
+		u8 keyStream_2[KSLen];
+		//将状态代入grain中,获得对应的长度为KSLen的密钥流，并输出其差分
+		ECRYPT_grain_state_load(&ctx_1,rnd_state_1);
+		ECRYPT_grain_state_load(&ctx_2,rnd_state_2);
+		ECRYPT_keystream_bytes(&ctx_1,keyStream_1,KSLen);
+		ECRYPT_keystream_bytes(&ctx_2,keyStream_2,KSLen);
+		//计算输出差分
+		u8 Diff_KS[KSLen];
+		for(int j=0;j<KSLen;j++){
+			Diff_KS[j]=keyStream_1[j]^keyStream_2[j];
+		}
+		//计算KSD characteristic
+		for(int j=0;j<KSLen;j++){
+			And_logic[j]&=Diff_KS[j];
+			Or_logic[j]|=Diff_KS[j];
+		}
+	}
+	//计算当前输入差分对应的KSD的characteristic  
+	//And逻辑确定全1的位置  Or逻辑确定全0的位置  剩下的就是不确定的位置
+	//分别记录Active  non-active和possible active位置的下标
+	//vector<int> act_pos;
+	//vector<int> non_act_pos;
+	//vector<int> poss_act_pos;
+	string KSD_character="";
+	//int KW_KSD_CH=0;
+	for(int i=0;i<KSLen;i++){
+		u8 t_and=And_logic[i];
+		u8 t_or=Or_logic[i];
+		for(int j=0;j<8;j++){
+			if((t_and>>j)&0x01){
+				//KW_KSD_CH++;
+				KSD_character.append("1");
+				//act_pos.push_back(i*8+j+1);
+			}
+			else if(!( (t_or>>j)&0x01 )){
+				//KW_KSD_CH++;
+				KSD_character.append("0");
+				//non_act_pos.push_back(i*8+j+1);
+			}
+			else{
+				KSD_character.append("*");
+				//poss_act_pos.push_back(i*8+j+1);
+			}
+		}
+	}
+	return KSD_character;
+	/*cout<<"E-KSDC:"<<KSD_character;
+	cout<<"\nNumber of fixed positions："<<KW_KSD_CH;
+	cout<<"\nAbsolute active positions(Y)：{";
+	vector<int>::iterator beg=act_pos.begin();
+	vector<int>::iterator end=act_pos.end();
+	for(;beg!=end;beg++){
+		cout<<*beg<<",";
+	}
+	cout<<"}\nNon-active positions(N)：{";
+	beg=non_act_pos.begin();
+	end=non_act_pos.end();
+	for(;beg!=end;beg++){
+		cout<<*beg<<",";
+	}
+	cout<<"}\nPending positions(P)：{";
+	beg=poss_act_pos.begin();
+	end=poss_act_pos.end();
+	for(;beg!=end;beg++){
+		cout<<*beg<<",";
+	}
+	cout<<"}"<<endl;*/
+
+}
+
+
 
 
 /*

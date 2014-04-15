@@ -40,6 +40,7 @@ typedef struct
 
 } ECRYPT_ctx;
 
+
 #ifndef GRAIN_H
 #define INITCLOCKS 160
 #define N(i) (ctx->NFSR[80-i])
@@ -185,9 +186,21 @@ void ECRYPT_decrypt_bytes(
 		ECRYPT_ctx* ctx);
 #endif
 
+#define ECRYPT_GENERATES_KEYSTREAM_E_KSDC
+#ifdef ECRYPT_GENERATES_KEYSTREAM_E_KSDC
+	u8 ENCRYPT_grain_E_KSDC(
+		ECRYPT_ctx* ctx);
+#endif
+
 #define ECRYPT_GENERATES_BACKWARD_KEYSTREAM_BIT
 #ifdef	ECRYPT_GENERATES_BACKWARD_KEYSTREAM_BIT
 	u8 ENCRYPT_grain_keystream_backward(
+		ECRYPT_ctx* ctx);
+#endif
+
+#define ECRYPT_GENERATES_KEYSTREAM_BW_E_KSDC
+#ifdef	ECRYPT_GENERATES_KEYSTREAM_BW_E_KSDC
+	u8 ENCRYPT_grain_BW_E_KSDC(
 		ECRYPT_ctx* ctx);
 #endif
 
@@ -254,7 +267,7 @@ void ECRYPT_grain_state_load(
 
 //kevin edit
 # define LEN 20					//20(byte)*8=160-bit 的内部状态
-# define KSLen 15       // Length of keystream in bytes.
+# define KSLen 15      // Length of keystream in bytes.
 //# define T_NUM 50000			//每一组差分对应的测试用例的个数  也就是sampling的大小N
 # define DIR "D:\\Grain_table_new\\"
 
@@ -282,10 +295,19 @@ u32 HEAP_RIGHT(u32 i);
 void HEAP_MIN_HEAPIFY(KSD_Prop* A,u32 i,u32 heap_size);
 void BUILD_MIN_HEAP(KSD_Prop* A,u32 heap_size);
 
+//Grain_E_KSDC_Martin_Simple_Compute
+void average_fixed_pos_E_KSDC(u32 d,u32 num_ISD);
+void E_KSDC_fixed_pos_with_given_ISD(u32 d,u32 *pos);
+string E_KSDC_seq_with_given_ISD(u32 d,u32 *pos);
+//Grain_BW-E_KSDC_Martin_Simple_Compute
+
+
 //Grain_KSD_characteristic
 bool isExist(u32 *pos,int j,u32 curr_val);
 void ave_KSD_pos_with_fixed_diff(u32 d,u32 num_ISD,u32 N);
-void KSD_pos_with_fixed_diff(u32 d,u32 *pos,u32 num_ISD,u32 N);
+void KSD_pos_with_fixed_diff(u32 d,u32 *pos,u32 N);
+string KSD_sequence_with_fixed_diff(u32 d,u32 *pos,u32 N);
+
 void E_KSDC_enumerate_all_ISD(u32 d,u64 N);
 void E_KSDC_enu_for_search(u32 n,u32 k,u64 N,string fileName);
 bool E_KSDC_enu_for_search_sub(u32 k,u32 *v,u64 N,string fileName);
