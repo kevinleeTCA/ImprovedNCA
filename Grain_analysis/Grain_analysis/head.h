@@ -267,7 +267,7 @@ void ECRYPT_grain_state_load(
 
 //kevin edit
 # define LEN 20					//20(byte)*8=160-bit 的内部状态
-# define KSLen 15      // Length of keystream in bytes.
+# define KSLen 10      // Length of keystream in bytes.
 //# define T_NUM 50000			//每一组差分对应的测试用例的个数  也就是sampling的大小N
 # define DIR "D:\\Grain_table_new\\"
 
@@ -300,7 +300,8 @@ void average_fixed_pos_E_KSDC(u32 d,u32 num_ISD);
 void E_KSDC_fixed_pos_with_given_ISD(u32 d,u32 *pos);
 string E_KSDC_seq_with_given_ISD(u32 d,u32 *pos);
 //Grain_BW-E_KSDC_Martin_Simple_Compute
-
+string BW_E_KSDC_seq_with_given_ISD(u32 d,u32 *pos);
+void average_fixed_pos_BW_E_KSDC(u32 d,u32 num_ISD);
 
 //Grain_KSD_characteristic
 bool isExist(u32 *pos,int j,u32 curr_val);
@@ -317,7 +318,7 @@ void E_KSDC_calculation(u32 k,u32 *v,u64 N,string fileName);
 //Grain_KSD_backward_characteristic
 void BW_ave_KSD_pos_with_fixed_diff(u32 d,u32 num_ISD,u32 N);
 void BW_KSD_pos_with_fixed_diff(u32 d,u32 *pos,u32 num_ISD,u32 N);
-
+string BW_KSD_seq_with_fixed_diff(u32 d,u32 *pos,u32 N);
 
 //Grain_KSD_backward_characteristic_with_sampling_resistance
 void BW_ave_KSD_pos_with_fixed_diff_with_SP(u32 d,u32 num_ISD,u32 N);

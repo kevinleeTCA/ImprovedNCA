@@ -74,6 +74,9 @@ u8 ENCRYPT_grain_E_KSDC(ECRYPT_ctx* ctx){
 	//calculate output bit
 	if(X4|X3|X2|X1|X0){
 		outbit=2;    // pending state
+	}else if(N(79)>1 || N(78)>1 || N(76)>1 || N(70)>1 
+		|| N(49)>1 || N(37)>1 || N(24)>1){
+		outbit=2;    // pending state
 	}else
 		outbit= N(79)^N(78)^N(76)^N(70)^N(49)^N(37)^N(24);
 	//calculate LFSR newly updated bit
@@ -81,7 +84,9 @@ u8 ENCRYPT_grain_E_KSDC(ECRYPT_ctx* ctx){
 	//calculate NFSR newly updated bit
 	if(N(17)|N(20)|N(28)|N(35)|N(43)|N(47)|N(52)|N(59)|N(65)|N(71)){
 		NBit=2;		//pending state
-	}else		
+	}else if (L(80)>1 || N(18)>1 || N(66)>1 || N(80)>1){
+		NBit=2;
+	}else
 		NBit=L(80)^N(18)^N(66)^N(80);
 	/* Update registers */
 	for (i=1;i<(ctx->keysize);++i) {
@@ -134,13 +139,18 @@ u8 ENCRYPT_grain_BW_E_KSDC(ECRYPT_ctx* ctx){
 	L0=L(18)^L(29)^L(42)^L(57)^L(67)^L79;
 	if(N(17)|N(20)|N(28)|N(35)|N(43)|N(47)|N(52)|N(59)|N(65)|N(71)){
 		N0=2;		//pending state
-	}else		
+	}else if (N79>1 || L0>1 || N(18)>1 || N(66)>1){
+		N0=2;
+	}else
 		N0=N79^L0^N(18)^N(66);
 	//¸üĞÂLFSR[0]ºÍNFSR[0]
 	ctx->NFSR[0]=N0;
 	ctx->LFSR[0]=L0;
 		//calculate output bit
 	if(X4|X3|X2|X1|X0){
+		outbit=2;    // pending state
+	}else if(N(79)>1 || N(78)>1 || N(76)>1 || N(70)>1 
+		|| N(49)>1 || N(37)>1 || N(24)>1){
 		outbit=2;    // pending state
 	}else
 		outbit= N(79)^N(78)^N(76)^N(70)^N(49)^N(37)^N(24);

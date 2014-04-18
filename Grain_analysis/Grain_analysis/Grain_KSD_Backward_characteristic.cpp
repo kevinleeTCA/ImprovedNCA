@@ -218,3 +218,83 @@ void BW_KSD_pos_with_fixed_diff(u32 d,u32 *pos,u32 num_ISD,u32 N){
 		cout<<"}\n";
 	}
 }
+
+
+
+/*numerical experiment
+  d: ISD hamming weight
+  pos: position indexes of active bit    NFSR:0~79£¬LFSR:80~159
+  this function return the BW-E-KSDC sequence , give a specific ISD
+ */
+string BW_KSD_seq_with_fixed_diff(u32 d,u32 *pos,u32 N){
+	    //initial ISD
+		u8 ISD[LEN];
+		for(int j=0;j<LEN;j++){
+			ISD[j]=0;
+		}
+		//induce differences
+		for(int j=0;j<d;j++){
+			u32 p=posIdx(pos[j]);
+			u32 r=rotateIdx(pos[j]);
+			ISD[p]=ISD[p]^(1<<r);
+		}
+		u8 And_logic[KSLen];   //to determine the absolute active state
+		u8 Or_logic[KSLen];		//to determine the non-active state
+		for(int i=0;i<KSLen;i++){
+			And_logic[i]=255;
+			Or_logic[i]=0;
+		}
+		for(int i=0;i<N;i++){
+			//randomly generate a state
+			u8 rnd_state_1[LEN];
+			for(int j=0;j<LEN;j++){
+				rnd_state_1[j]=rc4();
+			}
+			//calculate the companion state, according to the ISD
+			u8 rnd_state_2[LEN];
+			for(int j=0;j<LEN;j++){
+				rnd_state_2[j]=rnd_state_1[j]^ISD[j];
+			}
+			//load to Grain v1
+			ECRYPT_ctx ctx_1;
+			ctx_1.keysize=80;
+			ctx_1.ivsize=64;
+			u8 keyStream_1[KSLen];
+			ECRYPT_ctx ctx_2;
+			ctx_2.keysize=80;
+			ctx_2.ivsize=64;
+			u8 keyStream_2[KSLen];
+			//calculate the backward KSD
+			ECRYPT_grain_state_load(&ctx_1,rnd_state_1);
+			ECRYPT_grain_state_load(&ctx_2,rnd_state_2);
+			ECRYPT_keystream_backward_bytes(&ctx_1,keyStream_1,KSLen);
+			ECRYPT_keystream_backward_bytes(&ctx_2,keyStream_2,KSLen);
+			//calculate the difference
+			u8 Diff_KS[KSLen];
+			for(int j=0;j<KSLen;j++){
+				Diff_KS[j]=keyStream_1[j]^keyStream_2[j];
+			}
+			//calculate backward KSD characteristic
+			for(int j=0;j<KSLen;j++){
+				And_logic[j]&=Diff_KS[j];
+				Or_logic[j]|=Diff_KS[j];
+			}
+		}
+		string BW_KSD_character="";
+		for(int i=0;i<KSLen;i++){
+			u8 t_and=And_logic[i];
+			u8 t_or=Or_logic[i];
+			for(int j=0;j<8;j++){
+				if((t_and>>j)&0x01){
+					BW_KSD_character.append("1");
+				}
+				else if(!( (t_or>>j)&0x01 )){
+					BW_KSD_character.append("0");
+				}
+				else{
+					BW_KSD_character.append("*");
+				}
+			}
+		}
+		return BW_KSD_character;
+}

@@ -15,6 +15,13 @@ void convertHexArray(u32 *arr,u32 Len,u8 *hexArr){
 }
 
 int main(){
+	//re-check the E-KSDC calculation
+	//srand((unsigned)time(NULL));
+	//rc4_setup();
+	//u32 pos[5]={93,106,68,27,67};
+	//E_KSDC_fixed_pos_with_given_ISD(5,pos);
+
+
 	//test the speed of E-KSDC calculation
 	//srand((unsigned)time(NULL));
 	//rc4_setup();
@@ -124,118 +131,237 @@ int main(){
 	//	printf("\n");
 	//}
 
-
-	//Test the correctness of calculation E-KSDC
-	//compared with numerical results
-	srand((unsigned)time(NULL));
+	//test the average number of fixed positions in BW-E-KSDC
+	/*srand((unsigned)time(NULL));
 	rc4_setup();
-	//test 1000 times
-	u32 counter=0;
-	for(int D=0;D<1000;D++){
-		u32 d=rc4() % 25+1;  //  consider hamming weight lower than 25
-		u32 d=4;
-		u32 N=100000;		// sampling size of numerical experiment
-		u32 *pos=new u32[d]();
-		if((++counter) % 250 ==0){
-			cout<<"proceed "<<setprecision(3)<<(double)counter*100/1000<<"%..."<<endl;
-		}
-
-		string KSDC_Gen_Alo="";
-		string KSDC_num_exp="";
-		KSDC_Gen_Alo=E_KSDC_seq_with_given_ISD(d,pos);
-		KSDC_num_exp=KSD_sequence_with_fixed_diff(d,pos,N);
-		if(KSDC_Gen_Alo.compare(KSDC_num_exp)!=0){ //record the exceptional cases, i.e., inconsistent cases
-			//randomly induce differences
-			cout<<"ISD differential index:{";
-			for(int i=0;i<d;i++){
-				pos[i]=rc4() % 160;
-				cout<<pos[i]<<",";
-			}
-			cout<<"}"<<endl;
-			cout<<"KSDC (GA):"<<KSDC_Gen_Alo<<endl;
-			cout<<"KSDC (NE):"<<KSDC_num_exp<<endl;
-			vector<int> act_pos;
-			vector<int> non_act_pos;
-			vector<int> pending_pos;
-
-			vector<int> act_pos_NE;
-			vector<int> non_act_pos_NE;
-			vector<int> pending_pos_NE;
-			u32 KSDC_gen_alo_fixed_num=0;
-			u32 KSDC_num_exp_fixed_num=0;
-			for(int j=0;j<KSLen*8;j++){
-				if(KSDC_Gen_Alo.at(j)=='0'){
-					KSDC_gen_alo_fixed_num++;
-					non_act_pos.push_back(j+1);
-				}else if(KSDC_Gen_Alo.at(j)=='1'){
-					KSDC_gen_alo_fixed_num++;
-					act_pos.push_back(j+1);
-				}else
-					pending_pos.push_back(j+1);
-
-
-				if(KSDC_num_exp.at(j)=='0'){
-					KSDC_num_exp_fixed_num++;
-					non_act_pos_NE.push_back(j+1);
-				}else if(KSDC_num_exp.at(j)=='1'){
-					KSDC_num_exp_fixed_num++;
-					act_pos_NE.push_back(j+1);
-				}else
-					pending_pos_NE.push_back(j+1);
-
-
-			}
-			cout<<"Number of fixed positions (GA)£º"<<KSDC_gen_alo_fixed_num;
-			cout<<"\nNumber of fixed positions (NE)£º"<<KSDC_num_exp_fixed_num;
-			cout<<"\nAbsolute active positions(Y) (GA):{";
-			vector<int>::iterator beg=act_pos.begin();
-			vector<int>::iterator end=act_pos.end();
-			for(;beg!=end;beg++){
-				cout<<*beg<<",";
-			}
-			cout<<"}\nAbsolute active positions(Y) (NE):{";
-			beg=act_pos_NE.begin();
-			end=act_pos_NE.end();
-			for(;beg!=end;beg++){
-				cout<<*beg<<",";
-			}
+	average_fixed_pos_BW_E_KSDC(10,50000);*/
+    
 	
-			cout<<"}\nNon-active positions(N) (GA)£º{";
-			beg=non_act_pos.begin();
-			end=non_act_pos.end();
-			for(;beg!=end;beg++){
-				cout<<*beg<<",";
-			}
-			cout<<"}\nNon-active positions(N) (NE)£º{";
-			beg=non_act_pos_NE.begin();
-			end=non_act_pos_NE.end();
-			for(;beg!=end;beg++){
-				cout<<*beg<<",";
-			}
+	//Test the correctness of calculation BW-E-KSDC
+	//compared with numerical results
+	//srand((unsigned)time(NULL));
+	//rc4_setup();
+	//test 1000 times
+	//u32 counter=0;
+	//for(int D=0;D<1000;D++){
+	//	u32 d=rc4() % 25+1;  //  consider hamming weight lower than 25
+	//	u32 N=100000;		// sampling size of numerical experiment
+	//	u32 *pos=new u32[d]();
+	//	randomly induce differences
+	//	for(int i=0;i<d;i++){
+	//		pos[i]=rc4() % 160;
+	//	}
+	//	if((++counter) % 250 ==0){
+	//		cout<<"proceed "<<setprecision(3)<<(double)counter*100/1000<<"%..."<<endl;
+	//	}
+
+	//	string BW_KSDC_Gen_Alo="";
+	//	string BW_KSDC_num_exp="";
+	//	BW_KSDC_Gen_Alo=BW_E_KSDC_seq_with_given_ISD(d,pos);
+	//	BW_KSDC_num_exp=BW_KSD_seq_with_fixed_diff(d,pos,N);
+	//	if(BW_KSDC_Gen_Alo.compare(BW_KSDC_num_exp)!=0){ //record the exceptional cases, i.e., inconsistent cases
+	//		cout<<"ISD differential index:{";
+	//		for(int i=0;i<d;i++){
+	//			cout<<pos[i]<<",";
+	//		}
+	//		cout<<"}"<<endl;
+	//		cout<<"BW-E-KSDC (GA):"<<BW_KSDC_Gen_Alo<<endl;
+	//		cout<<"BW-E-KSDC (NE):"<<BW_KSDC_num_exp<<endl;
+	//		vector<int> act_pos;
+	//		vector<int> non_act_pos;
+	//		vector<int> pending_pos;
+
+	//		vector<int> act_pos_NE;
+	//		vector<int> non_act_pos_NE;
+	//		vector<int> pending_pos_NE;
+	//		u32 KSDC_gen_alo_fixed_num=0;
+	//		u32 KSDC_num_exp_fixed_num=0;
+	//		for(int j=0;j<KSLen*8;j++){
+	//			if(BW_KSDC_Gen_Alo.at(j)=='0'){
+	//				KSDC_gen_alo_fixed_num++;
+	//				non_act_pos.push_back(j+1);
+	//			}else if(BW_KSDC_Gen_Alo.at(j)=='1'){
+	//				KSDC_gen_alo_fixed_num++;
+	//				act_pos.push_back(j+1);
+	//			}else
+	//				pending_pos.push_back(j+1);
 
 
-			cout<<"}\nPending positions(P) (GA)£º{";
-			beg=pending_pos.begin();
-			end=pending_pos.end();
-			for(;beg!=end;beg++){
-				cout<<*beg<<",";
-			}
-			cout<<"}\nPending positions(P) (NE)£º{";
-			beg=pending_pos_NE.begin();
-			end=pending_pos_NE.end();
-			for(;beg!=end;beg++){
-				cout<<*beg<<",";
-			}
-			cout<<"}"<<endl<<endl<<endl;
-		}
-		delete [] pos;
-		/*cout<<"------General Algorithm-----"<<endl;
-		E_KSDC_seq_with_given_ISD(d,pos);
-		cout<<"------Numberical Experiments----Number of sampling internal states:"<<N<<"----"<<endl;
-		KSD_pos_with_fixed_diff(d,pos,1,N);
-		cout<<endl<<endl;*/
-	}
-	cout<<"test complete..."<<endl;
+	//			if(BW_KSDC_num_exp.at(j)=='0'){
+	//				KSDC_num_exp_fixed_num++;
+	//				non_act_pos_NE.push_back(j+1);
+	//			}else if(BW_KSDC_num_exp.at(j)=='1'){
+	//				KSDC_num_exp_fixed_num++;
+	//				act_pos_NE.push_back(j+1);
+	//			}else
+	//				pending_pos_NE.push_back(j+1);
+
+
+	//		}
+	//		cout<<"Number of fixed positions (GA)£º"<<KSDC_gen_alo_fixed_num;
+	//		cout<<"\nNumber of fixed positions (NE)£º"<<KSDC_num_exp_fixed_num;
+	//		cout<<"\nAbsolute active positions(Y) (GA):{";
+	//		vector<int>::iterator beg=act_pos.begin();
+	//		vector<int>::iterator end=act_pos.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//		cout<<"}\nAbsolute active positions(Y) (NE):{";
+	//		beg=act_pos_NE.begin();
+	//		end=act_pos_NE.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//
+	//		cout<<"}\nNon-active positions(N) (GA)£º{";
+	//		beg=non_act_pos.begin();
+	//		end=non_act_pos.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//		cout<<"}\nNon-active positions(N) (NE)£º{";
+	//		beg=non_act_pos_NE.begin();
+	//		end=non_act_pos_NE.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+
+
+	//		cout<<"}\nPending positions(P) (GA)£º{";
+	//		beg=pending_pos.begin();
+	//		end=pending_pos.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//		cout<<"}\nPending positions(P) (NE)£º{";
+	//		beg=pending_pos_NE.begin();
+	//		end=pending_pos_NE.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//		cout<<"}"<<endl<<endl<<endl;
+	//	}
+	//	delete [] pos;
+	//	/*cout<<"------General Algorithm-----"<<endl;
+	//	E_KSDC_seq_with_given_ISD(d,pos);
+	//	cout<<"------Numberical Experiments----Number of sampling internal states:"<<N<<"----"<<endl;
+	//	KSD_pos_with_fixed_diff(d,pos,1,N);
+	//	cout<<endl<<endl;*/
+	//}
+	//cout<<"test complete..."<<endl;
+
+	////Test the correctness of calculation E-KSDC
+	////compared with numerical results
+	//srand((unsigned)time(NULL));
+	//rc4_setup();
+	////test 1000 times
+	//u32 counter=0;
+	//for(int D=0;D<1000;D++){
+	//	u32 d=rc4() % 25+1;  //  consider hamming weight lower than 25
+	//	u32 N=100000;		// sampling size of numerical experiment
+	//	u32 *pos=new u32[d]();
+	//	//randomly induce differences
+	//	for(int i=0;i<d;i++){
+	//		pos[i]=rc4() % 160;
+	//	}
+	//	if((++counter) % 250 ==0){
+	//		cout<<"proceed "<<setprecision(3)<<(double)counter*100/1000<<"%..."<<endl;
+	//	}
+
+	//	string KSDC_Gen_Alo="";
+	//	string KSDC_num_exp="";
+	//	KSDC_Gen_Alo=E_KSDC_seq_with_given_ISD(d,pos);
+	//	KSDC_num_exp=KSD_sequence_with_fixed_diff(d,pos,N);
+	//	if(KSDC_Gen_Alo.compare(KSDC_num_exp)!=0){ //record the exceptional cases, i.e., inconsistent cases
+	//		cout<<"ISD differential index:{";
+	//		for(int i=0;i<d;i++){
+	//			cout<<pos[i]<<",";
+	//		}
+	//		cout<<"}"<<endl;
+	//		cout<<"KSDC (GA):"<<KSDC_Gen_Alo<<endl;
+	//		cout<<"KSDC (NE):"<<KSDC_num_exp<<endl;
+	//		vector<int> act_pos;
+	//		vector<int> non_act_pos;
+	//		vector<int> pending_pos;
+
+	//		vector<int> act_pos_NE;
+	//		vector<int> non_act_pos_NE;
+	//		vector<int> pending_pos_NE;
+	//		u32 KSDC_gen_alo_fixed_num=0;
+	//		u32 KSDC_num_exp_fixed_num=0;
+	//		for(int j=0;j<KSLen*8;j++){
+	//			if(KSDC_Gen_Alo.at(j)=='0'){
+	//				KSDC_gen_alo_fixed_num++;
+	//				non_act_pos.push_back(j+1);
+	//			}else if(KSDC_Gen_Alo.at(j)=='1'){
+	//				KSDC_gen_alo_fixed_num++;
+	//				act_pos.push_back(j+1);
+	//			}else
+	//				pending_pos.push_back(j+1);
+
+
+	//			if(KSDC_num_exp.at(j)=='0'){
+	//				KSDC_num_exp_fixed_num++;
+	//				non_act_pos_NE.push_back(j+1);
+	//			}else if(KSDC_num_exp.at(j)=='1'){
+	//				KSDC_num_exp_fixed_num++;
+	//				act_pos_NE.push_back(j+1);
+	//			}else
+	//				pending_pos_NE.push_back(j+1);
+
+
+	//		}
+	//		cout<<"Number of fixed positions (GA)£º"<<KSDC_gen_alo_fixed_num;
+	//		cout<<"\nNumber of fixed positions (NE)£º"<<KSDC_num_exp_fixed_num;
+	//		cout<<"\nAbsolute active positions(Y) (GA):{";
+	//		vector<int>::iterator beg=act_pos.begin();
+	//		vector<int>::iterator end=act_pos.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//		cout<<"}\nAbsolute active positions(Y) (NE):{";
+	//		beg=act_pos_NE.begin();
+	//		end=act_pos_NE.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//
+	//		cout<<"}\nNon-active positions(N) (GA)£º{";
+	//		beg=non_act_pos.begin();
+	//		end=non_act_pos.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//		cout<<"}\nNon-active positions(N) (NE)£º{";
+	//		beg=non_act_pos_NE.begin();
+	//		end=non_act_pos_NE.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+
+
+	//		cout<<"}\nPending positions(P) (GA)£º{";
+	//		beg=pending_pos.begin();
+	//		end=pending_pos.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//		cout<<"}\nPending positions(P) (NE)£º{";
+	//		beg=pending_pos_NE.begin();
+	//		end=pending_pos_NE.end();
+	//		for(;beg!=end;beg++){
+	//			cout<<*beg<<",";
+	//		}
+	//		cout<<"}"<<endl<<endl<<endl;
+	//	}
+	//	delete [] pos;
+	////	/*cout<<"------General Algorithm-----"<<endl;
+	////	E_KSDC_seq_with_given_ISD(d,pos);
+	////	cout<<"------Numberical Experiments----Number of sampling internal states:"<<N<<"----"<<endl;
+	////	KSD_pos_with_fixed_diff(d,pos,1,N);
+	////	cout<<endl<<endl;*/
+	//}
+	//cout<<"test complete..."<<endl;
 
 
 
@@ -674,6 +800,24 @@ int main(){
 	/*u64 N_array[1]={2048};
 	cal_all_KSD_construct_table(1,N_array);*/
 
+
+	//calculate the average number of fixed positions in BW-E-KSDC
+	//srand((unsigned)time(NULL));
+	//rc4_setup();	
+	//for(int d=3;d<=30;d++){
+	//	cout<<"*************************d:"<<d<<"************************"<<endl;
+	//	//ave_KSD_pos_with_fixed_diff_with_SP(d,300,100000);
+	//	
+	//	average_fixed_pos_BW_E_KSDC(d,1000000);
+	//	//ave_KSD_pos_with_fixed_diff(d,500,100000);
+	//	//BW_ave_KSD_pos_with_fixed_diff(d,300,100000);
+	//	//BW_ave_KSD_pos_with_fixed_diff_with_SP(d,300,100000);
+	//}
+
+
+
+
+	//calculate the average number of fixed positions in E-KSDC
 	//srand((unsigned)time(NULL));
 	//rc4_setup();	
 	//for(int d=3;d<=30;d++){
